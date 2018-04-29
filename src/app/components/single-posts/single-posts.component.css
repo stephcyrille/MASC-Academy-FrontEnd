@@ -1,0 +1,16 @@
+.wrapper{
+    padding-top: 50px;
+}
+
+.general{
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.body h2{
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-top: 1px solid beige;
+    border-bottom: 2px solid #00313e36;
+    margin-top: 30px;
+}

@@ -1,0 +1,9 @@
+<div *ngIf="post; else nothing">
+    <div innerHTML="{{post.content}}"></div>
+</div>
+
+<ng-template #nothing>
+    <div class="wrapper" style="padding: 20px; height: 600px;">
+        <h1>{{errorMessage}}</h1>
+    </div>
+</ng-template>

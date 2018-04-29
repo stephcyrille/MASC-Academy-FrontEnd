@@ -1,0 +1,430 @@
+<div class="wrapper container">
+
+    <div class="row header"></div>
+  
+    <div class="row general">
+
+    <div class="col-lg-4 col-md-4">
+      <div class="card sticky-top" style="z-index: 0;">
+          <img class="card-img-top" src="assets/imgs/jhene.jpg" alt="Card image cap">
+          <div class="card-body" style="background-color: rgb(0, 95, 119); color: lightgrey">
+              <h5 class="card-title" align="center">Sommaire</h5>
+          </div>
+          <ul class="list-group list-group-flush">
+              <li class="list-group-item">Création du projet et configuration</li>
+              <li class="list-group-item">Installation des Plugins nécéssaires</li>
+              <li class="list-group-item">Création de la page principale</li>
+              <li class="list-group-item">Testons l'app dans un Terminal Android ou IOS le projet</li>
+          </ul>
+          </div>
+      </div>
+
+      <div class="col-lg-8 col-md-8">
+        <div class="head">
+          <h1>Telecharger une image avec ionic 3 (Partie 2)</h1>
+          Publié par <i>Stephane Cyrille Mebenga</i> le 15/04/2018<br><br>
+          
+          <p>
+            Nous voici arrivé à la deuxième partie de notre tutoriel de téléchargement d'image avec Ionic. 
+            Ici nous allons créer le Frontend, donc l'application en elle même avec Ionic. Notre 
+            application va communiquée avec une application serveur hébergée localement, application 
+            que vous trouverez sur Github au lien suivant<br>
+            <a href="https://github.com/MASCIntelligence/app-photo-serveur" target="_blank">
+              https://github.com/MASCIntelligence/app-photo-serveur 
+            </a>
+            <br>
+            Voici un apercu du travail final<br>
+            <figure>
+              <img src="assets/imgs/photo/0.jpg" alt="Projet final"/>
+              <figcaption>Projet final</figcaption>
+            </figure>
+          </p>
+
+          
+        </div>
+        
+        <div class="body">
+          
+          <h2 style="padding-top: 50px">1) Création du projet</h2>
+          <p>
+            Commençons par ouvrir le terminal et creons un nouveau projet<br>
+            <code>
+              ionic start photo-app blank<br>
+            </code><br>
+            Cela nous prendra quelques minutes, mais bon tout sera. Il n'y a plus qu'a se rendre dans 
+            le dossier du projet<br>
+            <code>
+              cd photo-app <br>
+            </code><br>
+            Il n'y a plus qu'a demarer l'app dans le navigateur en tappant la commande <br>
+            <code>
+              ionic serve -l<br>
+            </code><br>
+            Le navigateur par defaut va automatiquement se lancer et vous aurez cet ecran
+            <figure>
+              <img src="assets/imgs/photo/1.jpg" alt="Projet initial"/>
+              <figcaption>Projet initial</figcaption>
+            </figure>
+          </p>
+
+          
+          <h2 style="padding-top: 50px">2) Configuration et installation des Plugins nécéssaires</h2>
+          <p>
+            Nous allons installer le pluggin necessaire pour pouvoir utiliser la camera et le aussi avoir
+            acces a la galerie photo du telephone. Donc commencons par installer le plugin Camera et les 
+            paquets nodes au projet qui nous permettrons de manipuler le plugin.<br>
+            <code>
+              ionic cordova plugin add cordova-plugin-camera<br>
+              npm install --save @ionic-native/camera<br>
+            </code><br>
+            Cella prendra quelques temps mais bon, faudra juste patienter un peu. Maintenant allons ajouter
+            le plugin camera au fichier de configuration de l'app et notamment quelques modules necessaires au
+            fonctionnement de notre application. Editons le fichier <em>src/app/app.module.ts</em><br>
+          </p>
+          <pre class="language-typescript">
+            <code>
+import {{'{'}} HttpModule  {{'}'}} from '@angular/http';
+import {{'{'}} FormsModule  {{'}'}} from '@angular/forms';
+// ...
+// Importons le plugin natif
+import {{'{'}} Camera  {{'}'}} from '@ionic-native/camera';
+
+// ...
+// Ajouttons les Modules
+imports: [
+  BrowserModule,
+  HttpModule,
+  FormsModule,
+  IonicModule.forRoot(MyApp)
+],
+
+// ...
+// Ajoutons Camera aux providers
+providers: [
+  StatusBar,
+  SplashScreen,
+  {{'{'}}provide: ErrorHandler, useClass: IonicErrorHandler{{'}'}},
+  Camera
+]
+
+
+// ...
+            </code>
+          </pre>
+          <p>
+            Maintenant vous pouvez utiliser le plugin Camera dans tous vos projets.
+          </p>
+          <h2 style="padding-top: 50px">3) Création de la page principale</h2> 
+          <p> 
+            Allons dans le repertoire <em>src/pages</em> et editons le fichier <em>home.ts</em><br>
+          </p> 
+          <pre class="language-typescript">
+            <code>
+import {{'{'}} Component {{'}'}} from '@angular/core';
+import {{'{'}} Http {{'}'}} from '@angular/http';
+
+import {{'{'}} NavController, ToastController, {{'}'}} from 'ionic-angular';
+
+// Native Plugin 
+import {{'{'}} Camera, CameraOptions {{'}'}} from '@ionic-native/camera'; 
+
+import {{'{'}} Observable {{'}'}} from 'rxjs/Observable';
+
+
+
+
+@Component({{'{'}}
+  selector: 'page-home',
+  templateUrl: 'home.html',
+{{'}'}})
+export class HomePage{{'{'}}
+
+  
+  // For image Ops
+  imageURI:any;
+
+  constructor(public navCtrl: NavController, 
+              public camera: Camera,
+              public toastCtrl: ToastController,
+              // Service
+              public http: Http
+              ) 
+  {{'{'}} {{'}'}}
+
+
+  uploadImage(){{'{'}}
+    let url = "https://localhost:8000/api/image/";
+    let postData = new FormData();
+    
+    postData.append('photo', this.imageURI);
+
+    let data: Observable&lt;any> = this.http.post(url, postData);
+    
+    data.subscribe((result) => {{'{'}}
+      alert('Image publiee avec succes');
+    {{'}'}}, err => {{'{'}}alert(err)});
+    
+  {{'}'}}
+
+
+  getAppPicture(){{'{'}}
+    const options: CameraOptions = {{'{'}}
+      quality: 100,
+      destinationType: this.camera.DestinationType.DATA_URL,
+      encodingType: this.camera.EncodingType.JPEG,
+      mediaType: this.camera.MediaType.PICTURE,
+    {{'}'}};
+
+    this.camera.getPicture(options).then((imageData) => {{'{'}}
+        this.imageURI = 'data:image/jpeg;base64,' + imageData;
+      {{'}'}}, 
+      (err) => {{'{'}}
+        console.log(err);
+        this.presentToast(err);
+      {{'}'}}
+    ); 
+
+  {{'}'}}
+
+
+  getGalPicture(){{'{'}}
+
+    const options: CameraOptions = {{'{'}}
+      quality: 100,
+      destinationType: this.camera.DestinationType.DATA_URL,
+      encodingType: this.camera.EncodingType.JPEG,
+      mediaType: this.camera.MediaType.PICTURE,
+      sourceType: this.camera.PictureSourceType.PHOTOLIBRARY
+    {{'}'}};
+
+    this.camera.getPicture(options).then(
+      (imageData) => {{'{'}}
+        this.imageURI = 'data:image/jpeg;base64,' + imageData;
+      {{'}'}}, 
+      (err) => {{'{'}}
+        console.log(err);
+        this.presentToast(err);
+      {{'}'}}
+    ); 
+
+  {{'}'}}
+
+
+  presentToast(msg) {{'{'}}
+    let toast = this.toastCtrl.create({{'{'}}
+      message: msg,
+      duration: 3000,
+      position: 'bottom'
+    {{'}'}});
+  
+    toast.onDidDismiss(() => {{'{'}}
+      console.log('Dismissed toast');
+    {{'}'}});
+  
+    toast.present();
+  {{'}'}}
+{{'}'}}
+                
+            </code>
+          </pre>
+          <br>
+          Pensons ensuite a la la creation de la vue est requise donc rendez-vous ajoutez
+          les lignes suivantes au fichier <em>src/pages/home/home.html</em><br>
+          <pre class="language-markup">
+            <code>
+&lt;ion-header>
+  &lt;ion-navbar>
+    &lt;ion-title>
+      App Photo
+    &lt;/ion-title>
+  &lt;/ion-navbar>
+&lt;/ion-header>
+
+&lt;ion-content padding>
+  &lt;div align="center" style="border: 1px solid lightgrey; padding-bottom: 10px">
+    &lt;h2 style="padding-top: 20px; padding-bottom: 10px">Ajouter une photo&lt;/h2>
+    &lt;ion-row>
+      &lt;ion-col col-12>
+
+        &lt;ion-row>
+          &lt;button ion-button color="primary" outline block (tap)="getAppPicture()">
+            &lt;ion-icon name="camera" item-start style="padding-right: 5px">&lt;/ion-icon>
+            Prendre une photo
+          &lt;/button>
+        &lt;/ion-row>
+
+        &lt;ion-row>
+          &lt;button ion-button color="dark" outline block (tap)="getGalPicture()">
+            &lt;ion-icon name="image" item-start style="padding-right: 5px">&lt;/ion-icon>
+            Récupérer depuis la Gallery
+          &lt;/button>
+        &lt;/ion-row>
+        &lt;hr>
+        &lt;img class="img-thm" [src]="imageURI"/>
+        &lt;hr>
+
+        &lt;ion-row>
+          &lt;button ion-button block color="secondary" (tap)="uploadImage()">
+            Enregistrer
+          &lt;/button>
+        &lt;/ion-row>
+      &lt;/ion-col>
+
+    &lt;/ion-row>
+  &lt;/div>
+&lt;/ion-content>
+
+            </code>
+          </pre>
+          <h2 style="padding-top: 50px">4) Testons l'app dans un Terminal Android ou IOS le projet</h2> 
+          <p>
+            Commencer par demarer l'app serveur concu precedemment pour pouvoir publier
+            les images qui proviennent de notre application Ionic. Ensuite installer la plateforme
+            Android ou iOS avec les commandes suivantes<br>
+            <code>
+              ionic cordova platform add android<br> 
+            </code> 
+            Pour ceux qui developpe sous android et <br>
+            <code>
+              ionic cordova platform add ios<br> 
+            </code><br>
+            Pour ceux qui sont chez iOS.<br><br>
+            Maintenant lancer l'app dans un peripherique reel<br>
+            <code>
+              ionic cordova run android<br> 
+            </code> 
+            Pour ceux qui developpe sous android et <br>
+            <code>
+              ionic cordova run ios<br> 
+            </code><br><br>
+            Voila le resultat dans mon teminal<br>
+            <figure>
+              <img src="assets/imgs/photo/5.jpg" alt="Rendu final"/>
+              <figcaption>Rendu final</figcaption>
+            </figure>
+          </p>
+         
+        </div>
+        
+        
+      
+
+      <div style="margin-top: 70px">
+      <hr>
+      <h2>Commentaires</h2>
+      </div>
+
+
+
+
+
+
+      <div class="row">
+        <div class="widget-area no-padding blank">
+          <div class="status-upload">
+            <form>
+              <textarea placeholder="Ajouter votre commentaire ici" ></textarea>
+              <ul>
+                <li><a title="" data-toggle="tooltip" data-placement="bottom" data-original-title="Audio"><i class="fa fa-music"></i></a></li>
+                <li><a title="" data-toggle="tooltip" data-placement="bottom" data-original-title="Video"><i class="fa fa-video-camera"></i></a></li>
+                <li><a title="" data-toggle="tooltip" data-placement="bottom" data-original-title="Sound Record"><i class="fa fa-microphone"></i></a></li>
+                <li><a title="" data-toggle="tooltip" data-placement="bottom" data-original-title="Picture"><i class="fa fa-picture-o"></i></a></li>
+              </ul>
+              <button type="submit" class="btn btn-success green"><i class="fa fa-share"></i> Commenter</button>
+            </form>
+          </div><!-- Status Upload  -->
+        </div><!-- Widget Area -->
+      </div>
+
+
+
+
+
+
+    <div class="" style="margin-bottom: 50px; margin-top: 30px;">
+
+      <div class="row">
+        <div class="col-sm-12" style="padding-left: 0px;padding-right: 0px;">
+            <div class="card panel-white post panel-shadow">
+                <div class="post-heading">
+                    <div class="image" style="float: left">
+                        <img src="http://bootdey.com/img/Content/user_1.jpg" class="img-circle avatar" alt="user profile image">
+                    </div>
+                    <div class="meta" style="float: left">
+                        <div class="title h5">
+                            <a href="#"><b>Ryan Haywood</b></a>
+                            made a post.
+                        </div>
+                        <h6 class="text-muted time">1 minute ago</h6>
+                    </div>
+                </div> 
+                <div class="post-description"> 
+                    <p>Bootdey is a gallery of free snippets resources templates and utilities for bootstrap css hmtl js framework. Codes for developers and web designers</p>
+                    <div class="stats">
+                        <a href="#" class="btn btn-secondary stat-item">
+                            <i class="fa fa-thumbs-up icon"></i>2
+                        </a>
+                        <a href="#" class="btn btn-secondary stat-item">
+                            <i class="fa fa-thumbs-down icon"></i>12
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-12" style="padding-left: 0px;padding-right: 0px; margin-bottom: 50px; margin-top: 30px;">
+            <div class="card panel-white post panel-shadow">
+                <div class="post-heading">
+                    <div class="image" style="float: left">
+                        <img src="http://bootdey.com/img/Content/user_1.jpg" class="img-circle avatar" alt="user profile image">
+                    </div>
+                    <div class="meta" style="float: left">
+                        <div class="title h5">
+                            <a href="#"><b>John Doe</b></a>
+                            A fait un post.
+                        </div>
+                        <h6 class="text-muted time">Il y'a environ 1min</h6>
+                    </div>
+                </div> 
+                <div class="post-description"> 
+                    <p>Bootdey is a gallery of free snippets resources templates and utilities for bootstrap css hmtl js framework. Codes for developers and web designers</p>
+                    <div class="stats">
+                        <a href="#" class="btn btn-secondary stat-item">
+                            <i class="fa fa-thumbs-up icon"></i>2
+                        </a>
+                        <a href="#" class="btn btn-secondary stat-item">
+                            <i class="fa fa-thumbs-down icon"></i>12
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+
+
+    </div>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+    </div>
+  
+  </div>

@@ -1,0 +1,31 @@
+<div class="wrapper">
+
+  <div class="row header"></div>
+
+  <div class="row general">
+    <div class="container">
+      <h1 align="center">Tous les Articles publiés</h1>
+
+      <div class="row homeport1" *ngIf="posts">
+        <div class="col-md-3 col-sm-4 col-xs-12 portfolio-item" *ngFor="let post of posts">
+            <figure class="effect-oscar">
+              <a href="#" routerLink="/posts/all/{{post.slug}}">
+                <img src="assets/imgs/1.jpeg" alt="img09" class="img-fluid">
+                <figcaption>
+                  <h2>{{ post.description }}</h2>
+                </figcaption>    
+              </a>       
+            </figure>
+            <p class="text-center">{{ post.title }}</p>
+            <div class="text-center">
+              <a class="btn btn-outline-warning btn-md" href="#" routerLink="/posts/all/{{post.slug}}">
+                Lire plus
+              </a>
+            </div>
+          </div>
+      </div>						
+
+    </div>
+  </div>
+
+</div>
